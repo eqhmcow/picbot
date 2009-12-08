@@ -1,4 +1,6 @@
-#! /usr/bin/env ruby
+#!/usr/bin/env ruby
+
+# Adapted from loudbot doc script (written by joeyk <http://spiryx.net/>)
 
 def fix_html(ary)
   text = ""
@@ -160,13 +162,13 @@ $template = <<EOF
 
 </style>
 
-<title>Loudbot v0.0 Documentation</title>
+<title>picbot v0.1 Documentation</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
 </head>
 <body>
   <div class="main">
-    <div class="header"><h1>Loudbot v0.0 Documentation</h1></div>
+    <div class="header"><h1>picbot v0.1 Documentation</h1></div>
     <div class="command_index">
       <ul>
         <li><a href="#capture">capture</a></li>
