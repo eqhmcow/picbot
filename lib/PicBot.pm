@@ -6,20 +6,26 @@ use Robit;
 use PicBot::DB;
 use LWP::UserAgent::POE;
 
+use feature ':5.10';
+
 my $extensions = 'jpe?g|png|p.m|gif|svg|bmp|tiff';
-my %last;
 
 sub spawn {
     my ($nick,$server,@channels) = @_;
-    die "Need nick/server/etc" unless @channels;
+    die "Need nick/server/etc\n" unless @channels;
+    my ($s,$p) = split /:/, $server;
+    $p //= 6667;
 
     my $r = Robit->new(
         nick => $nick,
-        server => $server,
+        server => $s,
+        port => $p,
         channels => [ @channels ],
+        ignores => [ qr/bot\d*_*$/, 'qq', 'botse', 'Redundant', 'TylerDurden', 'Bit', 'DeepTime', 'Madeline', 'cubert'],
         heap => {
             db => PicBot::DB->new(),
-            ua => LWP::UserAgent::POE->new(timeout => 7)
+            ua => LWP::UserAgent::POE->new(timeout => 7),
+            last => {},
         },
     );
 
@@ -29,22 +35,35 @@ sub spawn {
     $r->add_handler('addressed', \&source);
     $r->add_handler('addressed', \&fail);
 
-    $r->add_handler('addressed', \&img);
+    $r->add_handler('addressed', \&whosaid);
+    $r->add_handler('addressed', \&img); # catchall, must be last
     $r->spawn();
+}
+
+sub whosaid {
+    my ($robit,$what,$where,$who) = @_;
+    my $last = $robit->heap->{last};
+    if ($what =~ /^whosaid/) {
+        return unless exists $last->{$where};
+        $robit->irc->yield(privmsg => $where => "$who: " . $last->{$where}->{said}
+            . ' in ' . $last->{$where}->{channel} . ' on ' . $last->{$where}->{network});
+        return 1;
+    }
 }
 
 # This should be addressed, and be the last on the chain
 sub img {
     my ($robit,$what,$where,$who) = @_;
-    $last{$where} = $robit->heap->{db}->fetchrand();
+    my $last = $robit->heap->{last};
+    $last->{$where} = $robit->heap->{db}->fetchrand();
     # Quit your whining: if there's no data, crashing is like a feature
-    $robit->irc->yield(privmsg => $where => "$who: " . $last{$where}->{url});
+    $robit->irc->yield(privmsg => $where => "$who: " . $last->{$where}->{url});
     return 1;
 }
 
 sub source {
     my ($robit,$what,$where,$who) = @_;
-    if ($what =~ /\bsource\b/) {
+    if ($what =~ /^source/) {
         $robit->irc->yield(privmsg => $where => "http://github.com/iank/picbot");
         return 1;
     }
@@ -52,10 +71,11 @@ sub source {
 
 sub fail {
     my ($robit,$what,$where,$who) = @_;
+    my $last = $robit->heap->{last};
     if ($what =~ /404/) {
-        if (exists $last{$where}) {
-            $robit->heap->{db}->fail($last{$where}->{id});
-            delete $last{$where};
+        if (exists $last->{$where}) {
+            $robit->heap->{db}->fail($last->{$where}->{id});
+            delete $last->{$where};
             $robit->irc->yield(privmsg => $where => "$who: 10-4");
         }
         return 1;

@@ -52,7 +52,9 @@ sub fail {
 sub fetchrand {
     my ($self) = @_;
     my $p = $self->pdb->slice(int rand $self->pdb->count)->first();
-    return { id => $p->pid, url => $p->url };
+    return { id => $p->pid, url => $p->url,
+             said => $p->said, channel => $p->channel,
+             network => $p->network };
 }
 
 1
