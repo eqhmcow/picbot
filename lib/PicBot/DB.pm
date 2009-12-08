@@ -1,7 +1,6 @@
 package PicBot::DB;
 use Moose;
 use PicBot::DB::Main;
-use List::Util qw/sum/;
 
 has 'dsn' => (
     is => 'rw',
