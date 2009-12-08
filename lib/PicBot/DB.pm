@@ -42,4 +42,18 @@ sub insert {
     });
 }
 
+sub fail {
+    my ($self, $id) = @_;
+
+    my $pic = $self->pdb->find($id);
+    $pic->fails($pic->fails + 1) if defined $pic;
+    $pic->update();
+}
+
+sub fetchrand {
+    my ($self) = @_;
+    my $p = $self->pdb->slice(int rand $self->pdb->count)->first();
+    return { id => $p->pid, url => $p->url };
+}
+
 1
