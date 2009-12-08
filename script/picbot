@@ -1,0 +1,7 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use PicBot; # frijole made me do it
+
+PicBot::spawn('picbot', '', 'irc.freenode.net', '#hlaghl');
