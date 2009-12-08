@@ -2,6 +2,18 @@
 use strict;
 use warnings;
 
+use feature ':5.10';
+
 use PicBot; # frijole made me do it
 
-PicBot::spawn('picbot', '', 'irc.freenode.net', '#hlaghl');
+given ($ARGV[0]) {
+    when ('freenode') {
+        PicBot::spawn('picbot', 'irc.freenode.net',
+                      '##turtles', '#peltkore');
+    }
+    when ('slashnet') {
+        PicBot::spawn('ikki', 'irc.slashnet.org', '#mefi');
+    }
+
+    default { print STDERR "$0 <network>\n"; exit 1 }
+}

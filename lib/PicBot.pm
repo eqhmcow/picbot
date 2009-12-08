@@ -10,16 +10,13 @@ my $extensions = 'jpe?g|png|p.m|gif|svg|bmp|tiff';
 my %last;
 
 sub spawn {
-    my ($nick,$pass,$server,@channels) = @_;
-    $nick    //= 'picbot';
-    $server  //= 'irc.freenode.net';
-    $pass    //= '';
+    my ($nick,$server,@channels) = @_;
+    die "Need nick/server/etc" unless @channels;
 
     my $r = Robit->new(
         nick => $nick,
         server => $server,
         channels => [ @channels ],
-        pass => $pass,
         heap => {
             db => PicBot::DB->new(),
             ua => LWP::UserAgent::POE->new(timeout => 7)
