@@ -14,6 +14,9 @@ given ($ARGV[0]) {
     when ('slashnet') {
         PicBot::spawn('ikki', 'irc.slashnet.org', '#mefi');
     }
+    when ('testnet') {
+        PicBot::spawn('picbot', 'irc.freenode.net:9001', '##turtles');
+    }
 
     default { print STDERR "$0 <network>\n"; exit 1 }
 }
