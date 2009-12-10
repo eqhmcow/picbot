@@ -35,6 +35,7 @@ sub spawn {
     $r->add_handler('addressed', \&source);
     $r->add_handler('addressed', \&fail);
 
+    $r->add_handler('addressed', \&stats);
     $r->add_handler('addressed', \&whosaid);
     $r->add_handler('addressed', \&img); # catchall, must be last
     $r->spawn();
@@ -47,6 +48,15 @@ sub whosaid {
         return unless exists $last->{$where};
         $robit->irc->yield(privmsg => $where => "$who: " . $last->{$where}->{said}
             . ' in ' . $last->{$where}->{channel} . ' on ' . $last->{$where}->{network});
+        return 1;
+    }
+}
+
+sub stats {
+    my ($robit, $what, $where, $who) = @_;
+    if ($what =~ /^stats?/) {
+        my $reply = "$who: " . $robit->heap->{db}->pdb->count();
+        $robit->irc->yield(privmsg => $where => $reply);
         return 1;
     }
 }
